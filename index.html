@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Matheus — App Cury São Paulo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="Consultor imobiliário parceiro Cury em São Paulo — catálogo, simulador MCMV e contato direto." />
+<style>
+  :root {
+    --ground: #100d08;
+    --surface: #1b160d;
+    --surface-2: #241d12;
+    --card: #1f1a10;
+    --ink: #f4eedd;
+    --ink-soft: #b7ac90;
+    --ink-faint: #8a8064;
+    --accent: #ffc61a;
+    --accent-ink: #17120a;
+    --clay: #e67a3e;
+    --ring: rgba(244, 238, 221, 0.12);
+    --ring-strong: rgba(244, 238, 221, 0.24);
+    --shadow: rgba(0, 0, 0, 0.6);
+
+    --font-display: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    --font-ui: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Consolas", "Menlo", "Liberation Mono", monospace;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: #050403;
+    color: var(--ink);
+    font-family: var(--font-ui);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; background: none; border: none; }
+  svg.icon { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  h1, h2, h3, .display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    font-weight: 900;
+    margin: 0;
+  }
+
+  .app-frame {
+    max-width: 460px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    background: var(--ground);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  @media (min-width: 500px) {
+    body { display: flex; justify-content: center; padding: 28px 0; }
+    .app-frame { min-height: min(860px, 96dvh); border-radius: 28px; overflow: hidden; box-shadow: 0 40px 90px rgba(0,0,0,0.65); border: 1px solid var(--ring); }
+  }
+
+  .screens { flex: 1; position: relative; overflow: hidden; }
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 24px; }
+  .screen.active { display: flex; }
+
+  .tabbar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--ring);
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(10px);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 11px 4px 9px; color: var(--ink-faint); cursor: pointer; }
+  .tab svg.icon { width: 21px; height: 21px; }
+  .tab .tab-label { font-family: var(--font-mono); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tab.active { color: var(--accent); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; font-size: 0.9rem; padding: 15px 22px; border-radius: 100px; cursor: pointer; text-decoration: none; transition: transform 0.15s ease; width: 100%; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-ghost { background: var(--surface-2); color: var(--ink); border: 1.5px solid var(--ring-strong); }
+  .btn[disabled] { opacity: 0.5; pointer-events: none; }
+
+  .badge { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; background: color-mix(in srgb, var(--accent) 16%, var(--ground)); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 100px; padding: 7px 13px; }
+  .badge svg.icon { width: 14px; height: 14px; }
+
+  .stat { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--ring); border-radius: 100px; padding: 7px 12px; }
+  .stat svg.icon { width: 15px; height: 15px; color: var(--accent); }
+
+  #screen-home { padding-bottom: 20px; }
+  .home-hero { position: relative; aspect-ratio: 4/5; flex-shrink: 0; background: var(--surface); }
+  .home-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+  .home-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, var(--ground) 96%); }
+  .home-hero .who { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 2; }
+  .home-hero .who .name { font-size: 1.9rem; }
+  .home-hero .who .name em { font-style: normal; color: var(--accent); }
+  .home-hero .who .role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+
+  .home-body { padding: 18px 20px 8px; display: flex; flex-direction: column; gap: 16px; }
+  .home-body .pitch { font-size: 0.94rem; color: var(--ink-soft); }
+  .home-body .pitch strong { color: var(--ink); }
+  .home-rating { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); display: flex; align-items: center; gap: 6px; }
+  .home-rating .dots { display: inline-flex; gap: 3px; }
+  .home-rating .dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .home-rating .dots span.off { background: var(--ring-strong); }
+
+  .home-preview { padding: 4px 0 0 20px; }
+  .home-preview .lbl { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 12px; }
+  .home-preview .strip { display: flex; gap: 10px; overflow-x: auto; padding-right: 20px; scrollbar-width: none; }
+  .home-preview .strip::-webkit-scrollbar { display: none; }
+  .mini-card { flex: 0 0 118px; border-radius: 12px; overflow: hidden; position: relative; aspect-ratio: 3/4; cursor: pointer; border: 1px solid var(--ring); background: var(--surface); }
+  .mini-card img { width: 100%; height: 100%; object-fit: cover; }
+  .mini-card .mc-label { position: absolute; left: 8px; right: 8px; bottom: 8px; font-family: var(--font-mono); font-size: 0.62rem; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+
+  .screen-head { padding: 20px 20px 6px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .screen-head svg.icon { width: 20px; height: 20px; color: var(--accent); }
+  .screen-head h2 { font-size: 1.15rem; }
+  .screen-head .count { margin-left: auto; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); }
+
+  .deck-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; padding: 10px 0; }
+  .deck { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px calc(50% - 41%) 18px; scrollbar-width: none; }
+  .deck::-webkit-scrollbar { display: none; }
+  .dcard { flex: 0 0 82%; scroll-snap-align: center; background: var(--card); border: 1px solid var(--ring); border-radius: 18px; overflow: hidden; cursor: pointer; transition: transform 0.25s ease, opacity 0.25s ease; display: flex; flex-direction: column; }
+  .dcard .cover { position: relative; aspect-ratio: 1/1; background: var(--surface); }
+  .dcard .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .dcard .cover .zona { position: absolute; top: 10px; left: 10px; }
+  .dcard .cbody { padding: 14px 15px 16px; display: flex; flex-direction: column; gap: 9px; }
+  .dcard .name { font-size: 1rem; line-height: 1.15; }
+  .dcard .bairro { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-soft); }
+  .dcard .bairro svg.icon { width: 13px; height: 13px; color: var(--accent); }
+  .dcard .row { display: flex; gap: 7px; flex-wrap: wrap; }
+
+  .deck-dots { display: flex; justify-content: center; gap: 6px; padding-bottom: 6px; flex-shrink: 0; }
+  .deck-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ring-strong); transition: background 0.2s, width 0.2s; }
+  .deck-dots span.active { background: var(--accent); width: 16px; border-radius: 4px; }
+
+  .empty-state, .loading-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 30px; text-align: center; color: var(--ink-faint); font-family: var(--font-mono); font-size: 0.8rem; }
+
+  #screen-simulador .body { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 22px; flex: 1; justify-content: center; }
+  .sim-icon { width: 52px; height: 52px; border-radius: 16px; background: var(--surface); border: 1px solid var(--ring); display: flex; align-items: center; justify-content: center; }
+  .sim-icon svg.icon { width: 24px; height: 24px; color: var(--accent); }
+  .sim-title p { color: var(--ink-soft); font-size: 0.88rem; margin: 8px 0 0; }
+  .sim-input-row { display: flex; flex-direction: column; gap: 10px; }
+  .sim-input-row label { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+  .sim-input { font-family: var(--font-mono); font-size: 1.6rem; padding: 16px 18px; border-radius: 14px; border: 1.5px solid var(--ring-strong); background: var(--surface); color: var(--ink); width: 100%; }
+  .sim-input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+  .sim-result-card { display: none; background: var(--surface); border: 1px solid var(--ring-strong); border-radius: 16px; padding: 20px; flex-direction: column; gap: 12px; }
+  .sim-result-card.show { display: flex; }
+  .sim-result-card .label { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+  .sim-result-card .faixa { font-family: var(--font-display); text-transform: uppercase; font-size: 1.25rem; color: var(--accent); }
+  .sim-result-card .amount { font-family: var(--font-mono); font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+
+  #screen-falar .body { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 20px; flex: 1; justify-content: center; }
+  .context-chip { display: none; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--ring); border-radius: 100px; padding: 9px 8px 9px 14px; align-self: flex-start; }
+  .context-chip.show { display: flex; }
+  .context-chip span { font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-soft); }
+  .context-chip button { width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--ink-faint); }
+
+  form.lead { display: flex; flex-direction: column; gap: 14px; }
+  form.lead input { font-family: var(--font-ui); font-size: 1.05rem; padding: 16px 18px; border-radius: 14px; border: 1.5px solid var(--ring-strong); background: var(--surface); color: var(--ink); width: 100%; }
+  form.lead input::placeholder { color: var(--ink-faint); }
+  form.lead input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .lead-note { font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-faint); line-height: 1.6; }
+
+  .sheet-scrim { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; }
+  .sheet-scrim[hidden] { display: none; }
+  .sheet { width: 100%; max-height: 90%; background: var(--surface-2); border-radius: 22px 22px 0 0; border: 1px solid var(--ring-strong); border-bottom: none; overflow-y: auto; position: relative; animation: sheet-up 0.28s ease; }
+  @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
+  .sheet-handle { width: 38px; height: 4px; border-radius: 4px; background: var(--ring-strong); margin: 10px auto 0; }
+  .sheet-close { position: absolute; top: 14px; right: 14px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--ground) 65%, transparent); border: 1px solid var(--ring-strong); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+  .sheet-carousel { position: relative; aspect-ratio: 1/1; margin-top: 8px; background: var(--ground); }
+  .sheet-carousel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
+  .sheet-carousel img.active { opacity: 1; }
+  .sc-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.45); border: 1px solid var(--ring-strong); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; z-index: 3; }
+  .sc-nav.prev { left: 12px; } .sc-nav.next { right: 12px; }
+  .sc-dots { position: absolute; bottom: 12px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; z-index: 3; }
+  .sc-dots span { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.35); }
+  .sc-dots span.active { background: var(--accent); }
+
+  .sheet-body { padding: 18px 20px 28px; display: flex; flex-direction: column; gap: 16px; }
+  .sheet-body h3 { font-size: 1.35rem; }
+  .sheet-body .addr { font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+  .stat-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .amenity-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .amenity { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 8px 10px; font-size: 0.78rem; color: var(--ink-soft); }
+  .amenity svg.icon { width: 14px; height: 14px; color: var(--accent); }
+  .cta-row { display: flex; gap: 10px; margin-top: 4px; }
+  .legal { font-family: var(--font-mono); font-size: 0.64rem; color: var(--ink-faint); line-height: 1.6; padding-top: 4px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app-frame">
+  <div class="screens">
+
+    <section class="screen active" id="screen-home" data-screen="home">
+      <div class="home-hero">
+        <img src="assets/matheus-hero.webp" alt="Matheus" />
+        <div class="who">
+          <div class="name display">Matheus <em>· Cury SP</em></div>
+          <div class="role">Consultor imobiliário parceiro Cury</div>
+        </div>
+      </div>
+      <div class="home-body">
+        <span class="badge" id="icon-coin-slot"></span>
+        <p class="pitch">Rodei até você de Uber pra te mostrar isso: apartamento Minha Casa Minha Vida com <strong>entrada facilitada a partir de R$ 800,00</strong>. Dá uma olhada nos empreendimentos que eu vendo.</p>
+        <button class="btn btn-primary" data-goto="catalogo">Ver apartamentos</button>
+        <div class="home-rating">
+          <span class="dots"><span></span><span></span><span></span><span></span><span class="off"></span></span>
+          4.9 nas corridas — mesmo cuidado no seu financiamento
+        </div>
+      </div>
+      <div class="home-preview">
+        <div class="lbl">Toca pra abrir</div>
+        <div class="strip" id="home-strip"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-catalogo" data-screen="catalogo">
+      <div class="screen-head">
+        <span id="icon-grid-slot"></span>
+        <h2>Catálogo</h2>
+        <span class="count" id="deck-count"></span>
+      </div>
+      <div class="deck-wrap">
+        <div class="deck" id="deck"></div>
+        <div class="deck-dots" id="deck-dots"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-simulador" data-screen="simulador">
+      <div class="body">
+        <div>
+          <div class="sim-icon" id="icon-calc-slot"></div>
+          <div class="sim-title">
+            <h2 style="margin-top:12px;font-size:1.3rem;">Cabe no bolso?</h2>
+            <p>Sua renda mensal familiar. Eu já te digo a faixa do Minha Casa Minha Vida.</p>
+          </div>
+        </div>
+        <div class="sim-input-row">
+          <label for="renda">Renda mensal (R$)</label>
+          <input class="sim-input" type="number" id="renda" inputmode="numeric" placeholder="3.500" />
+        </div>
+        <button class="btn btn-primary" id="calcular">Calcular</button>
+        <div class="sim-result-card" id="sim-result">
+          <div class="label">Sua faixa</div>
+          <div class="faixa" id="sim-faixa">—</div>
+          <div class="amount" id="sim-amount"></div>
+          <button class="btn btn-ghost" id="ver-compat">Ver compatíveis no catálogo</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-falar" data-screen="falar">
+      <div class="body">
+        <div>
+          <div class="sim-icon" id="icon-chat-slot"></div>
+          <h2 style="margin-top:12px;font-size:1.3rem;">Fala comigo</h2>
+        </div>
+        <div class="context-chip" id="context-chip">
+          <span id="context-text"></span>
+          <button type="button" id="context-clear">×</button>
+        </div>
+        <form class="lead" id="lead-form">
+          <input type="text" id="nome" placeholder="Seu nome" required autocomplete="name" />
+          <input type="tel" id="fone" placeholder="Seu WhatsApp" required autocomplete="tel" />
+          <button class="btn btn-primary" type="submit" id="lead-submit">Enviar e abrir WhatsApp</button>
+        </form>
+        <p class="lead-note" id="lead-status"></p>
+        <p class="legal">Matheus — consultor imobiliário parceiro Cury Construtora. Entrada e condições sujeitas a aprovação de crédito e enquadramento MCMV — consulte condições atualizadas. Ao enviar, você concorda em ser contatado por WhatsApp sobre este assunto.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="tabbar">
+    <button class="tab active" data-goto="home"><span id="icon-tab-home"></span><span class="tab-label">Home</span></button>
+    <button class="tab" data-goto="catalogo"><span id="icon-tab-grid"></span><span class="tab-label">Apês</span></button>
+    <button class="tab" data-goto="simulador"><span id="icon-tab-calc"></span><span class="tab-label">Simular</span></button>
+    <button class="tab" data-goto="falar"><span id="icon-tab-chat"></span><span class="tab-label">Falar</span></button>
+  </nav>
+
+  <div class="sheet-scrim" id="sheet-scrim" hidden>
+    <div class="sheet" id="sheet">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" id="sheet-close">×</button>
+      <div class="sheet-carousel" id="sheet-carousel">
+        <button class="sc-nav prev" id="sc-prev">‹</button>
+        <button class="sc-nav next" id="sc-next">›</button>
+        <div class="sc-dots" id="sc-dots"></div>
+      </div>
+      <div class="sheet-body" id="sheet-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://jbtnywgozszrhhzvwmob.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_bdWQhN8xxY7zlWR6gcGA1g_x8gOYDAP";
+  const WHATSAPP_NUMBER = "5511975912060";
+  const SALARIO_MINIMO = 1621;
+  const ENTRADA = "R$ 800,00";
+
+  const sbHeaders = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
+
+  function sessionId() {
+    let id = localStorage.getItem("cury_session_id");
+    if (!id) { id = crypto.randomUUID(); localStorage.setItem("cury_session_id", id); }
+    return id;
+  }
+
+  async function track(tipo, empreendimento_id) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/eventos`, {
+        method: "POST",
+        headers: { ...sbHeaders, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify({ session_id: sessionId(), tipo, empreendimento_id: empreendimento_id || null }),
+      });
+    } catch (err) { console.error("track failed", tipo, err); }
+  }
+
+  const ICONS = {
+    bed: '<svg class="icon" viewBox="0 0 24 24"><path d="M3 18v-7a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v2"/><path d="M12 13h7a2 2 0 0 1 2 2v3"/><path d="M3 18h18"/><path d="M3 13v5"/><path d="M21 18v-3"/></svg>',
+    pin: '<svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.3"/></svg>',
+    coin: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M15 9.3c0-1.3-1.3-2.3-3-2.3s-3 .9-3 2.1c0 2.8 6 1.5 6 4.3 0 1.3-1.3 2.4-3 2.4s-3-1-3-2.3"/></svg>',
+    layers: '<svg class="icon" viewBox="0 0 24 24"><path d="M12 3 2 9l10 6 10-6-10-6Z"/><path d="M2 15l10 6 10-6"/></svg>',
+    home: '<svg class="icon" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>',
+    grid: '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+    calc: '<svg class="icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>',
+    chat: '<svg class="icon" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 3 6.2L4 20l1.6-3.6A8 8 0 0 1 4 12Z"/></svg>',
+    doc: '<svg class="icon" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg>',
+  };
+  function setIcon(id, name) { const el = document.getElementById(id); if (el) el.innerHTML = ICONS[name]; }
+  function waLink(text) { return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`; }
+
+  let DEVELOPMENTS = [];
+
+  function goto(screen) {
+    document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.dataset.screen === screen));
+    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.goto === screen));
+    if (screen === "catalogo") requestAnimationFrame(updateDeckScale);
+    track(`view_${screen}`);
+  }
+  function setupNav() {
+    document.querySelectorAll("[data-goto]").forEach((el) => el.addEventListener("click", () => goto(el.dataset.goto)));
+  }
+
+  async function loadDevelopments() {
+    const deck = document.getElementById("deck");
+    deck.innerHTML = '<div class="loading-state">Carregando empreendimentos…</div>';
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/empreendimentos?select=*&ativo=eq.true&order=nome`, { headers: sbHeaders });
+      if (!res.ok) throw new Error(`Supabase respondeu ${res.status}`);
+      DEVELOPMENTS = await res.json();
+      deck.innerHTML = "";
+      if (DEVELOPMENTS.length === 0) {
+        deck.innerHTML = '<div class="empty-state">Nenhum empreendimento ativo no momento.</div>';
+        return;
+      }
+      renderDeck();
+      renderHomeStrip();
+    } catch (err) {
+      console.error("Falha ao carregar empreendimentos", err);
+      deck.innerHTML = '<div class="empty-state">Não consegui carregar o catálogo agora.<br>Verifica sua internet e tenta de novo.</div>';
+    }
+  }
+
+  function renderDeck() {
+    const deck = document.getElementById("deck");
+    const dots = document.getElementById("deck-dots");
+    document.getElementById("deck-count").textContent = `${DEVELOPMENTS.length} empreendimentos`;
+    DEVELOPMENTS.forEach((d, i) => {
+      const card = document.createElement("div");
+      card.className = "dcard";
+      card.dataset.id = d.id;
+      card.innerHTML = `
+        <div class="cover">
+          <span class="badge zona">${ICONS.pin}${d.zona}</span>
+          <img src="${d.imagens[0]}" alt="${d.nome}" loading="lazy" />
+        </div>
+        <div class="cbody">
+          <div class="name">${d.nome}</div>
+          <div class="bairro">${ICONS.pin}${d.bairro}</div>
+          <div class="row">
+            <span class="stat">${ICONS.bed}${d.dorms}</span>
+            <span class="stat">${ICONS.coin}${ENTRADA}</span>
+          </div>
+        </div>
+      `;
+      card.addEventListener("click", () => openSheet(d));
+      deck.appendChild(card);
+
+      const dot = document.createElement("span");
+      if (i === 0) dot.classList.add("active");
+      dots.appendChild(dot);
+    });
+    deck.addEventListener("scroll", () => { requestAnimationFrame(updateDeckScale); syncDots(); }, { passive: true });
+    updateDeckScale();
+  }
+
+  function updateDeckScale() {
+    const deck = document.getElementById("deck");
+    const rect = deck.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    deck.querySelectorAll(".dcard").forEach((card) => {
+      const cr = card.getBoundingClientRect();
+      const cardCenter = cr.left + cr.width / 2;
+      const dist = Math.min(Math.abs(cardCenter - center) / rect.width, 1);
+      card.style.transform = `scale(${1 - dist * 0.14})`;
+      card.style.opacity = String(1 - dist * 0.5);
+    });
+  }
+
+  function syncDots() {
+    const deck = document.getElementById("deck");
+    const dots = document.getElementById("deck-dots").children;
+    const cards = deck.querySelectorAll(".dcard");
+    const rect = deck.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    let closest = 0, min = Infinity;
+    cards.forEach((card, i) => {
+      const cr = card.getBoundingClientRect();
+      const d = Math.abs((cr.left + cr.width / 2) - center);
+      if (d < min) { min = d; closest = i; }
+    });
+    Array.from(dots).forEach((dot, i) => dot.classList.toggle("active", i === closest));
+  }
+
+  function renderHomeStrip() {
+    const strip = document.getElementById("home-strip");
+    DEVELOPMENTS.forEach((d) => {
+      const mc = document.createElement("div");
+      mc.className = "mini-card";
+      mc.innerHTML = `<img src="${d.imagens[0]}" alt="${d.nome}" loading="lazy" /><div class="mc-label">${d.bairro}</div>`;
+      mc.addEventListener("click", () => openSheet(d));
+      strip.appendChild(mc);
+    });
+  }
+
+  let currentDev = null, currentImg = 0, lastViewedDev = null;
+
+  function openSheet(d) {
+    currentDev = d;
+    currentImg = 0;
+    lastViewedDev = d;
+    renderSheetCarousel();
+    renderSheetBody();
+    document.getElementById("sheet-scrim").hidden = false;
+    track("view_card", d.id);
+  }
+  function closeSheet() { document.getElementById("sheet-scrim").hidden = true; }
+
+  function renderSheetCarousel() {
+    const carousel = document.getElementById("sheet-carousel");
+    carousel.querySelectorAll("img").forEach((n) => n.remove());
+    currentDev.imagens.forEach((src, i) => {
+      const el = document.createElement("img");
+      el.src = src;
+      el.alt = `${currentDev.nome} — foto ${i + 1}`;
+      if (i === currentImg) el.classList.add("active");
+      carousel.insertBefore(el, document.getElementById("sc-prev"));
+    });
+    const dots = document.getElementById("sc-dots");
+    dots.innerHTML = "";
+    currentDev.imagens.forEach((_, i) => {
+      const dot = document.createElement("span");
+      if (i === currentImg) dot.classList.add("active");
+      dots.appendChild(dot);
+    });
+  }
+  function shiftSheetImg(delta) {
+    const n = currentDev.imagens.length;
+    currentImg = (currentImg + delta + n) % n;
+    renderSheetCarousel();
+  }
+
+  function renderSheetBody() {
+    const d = currentDev;
+    const body = document.getElementById("sheet-body");
+    const pdfHref = d.pdf_url ? d.pdf_url : waLink(`Oi Matheus! Pode me mandar o book completo (PDF) do ${d.nome}?`);
+    body.innerHTML = `
+      <h3>${d.nome}</h3>
+      <div class="addr">${ICONS.pin}${d.endereco}</div>
+      <div class="stat-row">
+        <span class="stat">${ICONS.bed}${d.dorms}</span>
+        <span class="stat">${ICONS.coin}Entrada ${ENTRADA}</span>
+        ${d.faixa ? `<span class="stat">${ICONS.layers}MCMV disponível</span>` : ""}
+      </div>
+      <div class="amenity-grid">
+        ${d.amenities.map((a) => `<span class="amenity">${a}</span>`).join("")}
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" target="_blank" rel="noopener" href="${waLink(`Vim do Uber, quero saber mais sobre o ${d.nome} (${d.bairro}).`)}">${ICONS.chat}Falar sobre esse</a>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-ghost" href="emp-${d.slug}.html">${ICONS.doc}Ver ficha completa</a>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-ghost" target="_blank" rel="noopener" href="${pdfHref}">${ICONS.doc}Book completo (PDF)</a>
+      </div>
+    `;
+  }
+
+  function setupSheet() {
+    document.getElementById("sheet-close").addEventListener("click", closeSheet);
+    document.getElementById("sheet-scrim").addEventListener("click", (e) => { if (e.target.id === "sheet-scrim") closeSheet(); });
+    document.getElementById("sc-prev").addEventListener("click", () => shiftSheetImg(-1));
+    document.getElementById("sc-next").addEventListener("click", () => shiftSheetImg(1));
+  }
+
+  function money(n) { return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }); }
+  function classify(renda) {
+    const sm = renda / SALARIO_MINIMO;
+    if (sm <= 3) return "his1";
+    if (sm <= 6) return "his2";
+    return "r2v";
+  }
+  let lastFaixa = null;
+  function setupSim() {
+    const input = document.getElementById("renda");
+    const result = document.getElementById("sim-result");
+    function calc() {
+      const renda = parseFloat(input.value);
+      if (!renda || renda <= 0) { input.focus(); return; }
+      lastFaixa = classify(renda);
+      const financMax = renda * 0.3 * 200;
+      const labels = { his1: "HIS-1 · até 3 SM", his2: "HIS-2 · 3 a 6 SM", r2v: "R2V · sem limite" };
+      document.getElementById("sim-faixa").textContent = labels[lastFaixa];
+      document.getElementById("sim-amount").textContent = `Financiamento estimado: até ${money(financMax)}`;
+      result.classList.add("show");
+      track("usa_simulador");
+    }
+    document.getElementById("calcular").addEventListener("click", calc);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") calc(); });
+    document.getElementById("ver-compat").addEventListener("click", () => {
+      goto("catalogo");
+      document.querySelectorAll(".dcard").forEach((card) => {
+        const d = DEVELOPMENTS.find((x) => x.id === card.dataset.id);
+        const compatible = !d.faixa || d.faixa[lastFaixa] > 0 || lastFaixa === "r2v";
+        card.style.filter = compatible ? "none" : "grayscale(0.8) opacity(0.35)";
+      });
+    });
+  }
+
+  function setupFalar() {
+    const chip = document.getElementById("context-chip");
+    const chipText = document.getElementById("context-text");
+    document.querySelectorAll('[data-goto="falar"]').forEach((el) => el.addEventListener("click", () => {
+      if (lastViewedDev) { chip.classList.add("show"); chipText.textContent = `Sobre: ${lastViewedDev.nome}`; }
+    }));
+    document.getElementById("context-clear").addEventListener("click", () => { chip.classList.remove("show"); lastViewedDev = null; });
+
+    document.getElementById("lead-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById("lead-submit");
+      const status = document.getElementById("lead-status");
+      const nome = document.getElementById("nome").value.trim();
+      const fone = document.getElementById("fone").value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Enviando…";
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+          method: "POST",
+          headers: { ...sbHeaders, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify({
+            nome, whatsapp: fone,
+            empreendimento_id: lastViewedDev ? lastViewedDev.id : null,
+            empreendimento_nome: lastViewedDev ? lastViewedDev.nome : null,
+            faixa_calculada: lastFaixa,
+            origem: "app-uber", session_id: sessionId(),
+          }),
+        });
+      } catch (err) {
+        console.error("Falha ao salvar lead", err);
+        status.textContent = "Deu ruim pra salvar seu contato, mas vou abrir o WhatsApp mesmo assim — manda a mensagem certinho.";
+      }
+      const sobre = lastViewedDev ? ` sobre o ${lastViewedDev.nome}` : "";
+      const msg = `Oi Matheus! Sou ${nome} (whats ${fone}), vim do seu Uber e quero saber mais${sobre}.`;
+      window.open(waLink(msg), "_blank", "noopener");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Enviar e abrir WhatsApp";
+    });
+  }
+
+  setIcon("icon-tab-home", "home");
+  setIcon("icon-tab-grid", "grid");
+  setIcon("icon-tab-calc", "calc");
+  setIcon("icon-tab-chat", "chat");
+  setIcon("icon-grid-slot", "grid");
+  setIcon("icon-calc-slot", "calc");
+  setIcon("icon-chat-slot", "chat");
+  document.getElementById("icon-coin-slot").innerHTML = ICONS.coin + " Entrada facilitada a partir de " + ENTRADA;
+
+  setupNav();
+  setupSheet();
+  setupSim();
+  setupFalar();
+  loadDevelopments();
+  track("view_home");
+  window.addEventListener("resize", updateDeckScale);
+</script>
+</body>
+</html>
