@@ -15,10 +15,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SUPABASE_URL = 'https://jbtnywgozszrhhzvwmob.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_bdWQhN8xxY7zlWR6gcGA1g_x8gOYDAP';
 const WHATSAPP_NUMBER = '5511975912060';
-// TODO: troca pelo dominio real assim que o app estiver hospedado (Coolify).
-// Sem isso, og:image/og:url/canonical/sitemap ficam com um endereco que nao existe —
-// o preview do link no WhatsApp so funciona depois de preenchido corretamente.
-const SITE_URL = 'https://SEU-DOMINIO-AQUI.com.br';
+// Hospedado no GitHub Pages por enquanto (grátis, deploy automático a cada push).
+// Se depois migrar pra domínio próprio via Coolify, só trocar esta linha e rodar de novo.
+const SITE_URL = 'https://matheusizb.github.io/corretor-cury-sp';
 
 function waLink(text) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
