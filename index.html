@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<title>Matheus — App Cury São Paulo</title>
+<title>Matheus Souza Imóveis SP — Apartamentos Cury em São Paulo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Consultor imobiliário parceiro Cury em São Paulo — catálogo, simulador MCMV e contato direto." />
+<meta name="description" content="Matheus Souza Imóveis SP — consultor parceiro Cury Construtora. Catálogo de lançamentos, simulador Minha Casa Minha Vida e contato direto no WhatsApp." />
 <style>
   :root {
     --ground: #100d08;
@@ -98,13 +98,20 @@
   .home-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
   .home-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, var(--ground) 96%); }
   .home-hero .who { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 2; }
-  .home-hero .who .name { font-size: 1.9rem; }
+  .home-hero .who .name { font-size: 1.7rem; }
   .home-hero .who .name em { font-style: normal; color: var(--accent); }
+  .home-hero .who .tagline { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.04em; margin-top: 4px; }
   .home-hero .who .role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
 
   .home-body { padding: 18px 20px 8px; display: flex; flex-direction: column; gap: 16px; }
   .home-body .pitch { font-size: 0.94rem; color: var(--ink-soft); }
   .home-body .pitch strong { color: var(--ink); }
+
+  .proof-card { background: var(--surface); border: 1px solid var(--ring-strong); border-left: 3px solid var(--accent); border-radius: 4px; padding: 14px 16px; }
+  .proof-card p { margin: 0; font-size: 0.92rem; font-style: italic; color: var(--ink); }
+  .proof-card p::before { content: "\201C"; color: var(--accent); font-style: normal; }
+  .proof-card p::after { content: "\201D"; color: var(--accent); font-style: normal; }
+  .proof-card .sig { margin-top: 8px; font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); }
   .home-rating { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); display: flex; align-items: center; gap: 6px; }
   .home-rating .dots { display: inline-flex; gap: 3px; }
   .home-rating .dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
@@ -135,6 +142,24 @@
   .dcard .bairro { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-soft); }
   .dcard .bairro svg.icon { width: 13px; height: 13px; color: var(--accent); }
   .dcard .row { display: flex; gap: 7px; flex-wrap: wrap; }
+  .stat-scarce { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+  .floating-wa {
+    position: absolute; right: 16px; bottom: 84px; z-index: 45;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 20px var(--shadow);
+    cursor: pointer;
+  }
+  .floating-wa svg.icon { width: 24px; height: 24px; }
+  .floating-wa::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--accent); opacity: 0.5;
+    animation: wa-pulse 2.2s ease-out infinite;
+  }
+  @keyframes wa-pulse { 0% { transform: scale(0.9); opacity: 0.5; } 100% { transform: scale(1.35); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .floating-wa::after { animation: none; display: none; } }
 
   .deck-dots { display: flex; justify-content: center; gap: 6px; padding-bottom: 6px; flex-shrink: 0; }
   .deck-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ring-strong); transition: background 0.2s, width 0.2s; }
@@ -205,15 +230,20 @@
 
     <section class="screen active" id="screen-home" data-screen="home">
       <div class="home-hero">
-        <img src="assets/matheus-hero.webp" alt="Matheus" />
+        <img src="assets/matheus-hero.webp" alt="Matheus Souza" />
         <div class="who">
-          <div class="name display">Matheus <em>· Cury SP</em></div>
+          <div class="name display">Matheus Souza <em>Imóveis SP</em></div>
+          <div class="tagline">Sonhos reais. Oportunidades de verdade.</div>
           <div class="role">Consultor imobiliário parceiro Cury</div>
         </div>
       </div>
       <div class="home-body">
         <span class="badge" id="icon-coin-slot"></span>
         <p class="pitch">Rodei até você de Uber pra te mostrar isso: apartamento Minha Casa Minha Vida com <strong>entrada facilitada a partir de R$ 800,00</strong>. Dá uma olhada nos empreendimentos que eu vendo.</p>
+        <div class="proof-card">
+          <p>Eu mesmo comprei um apartamento Cury — não pra morar, pra construir patrimônio.</p>
+          <div class="sig">Matheus, sobre a própria compra</div>
+        </div>
         <button class="btn btn-primary" data-goto="catalogo">Ver apartamentos</button>
         <div class="home-rating">
           <span class="dots"><span></span><span></span><span></span><span></span><span class="off"></span></span>
@@ -256,7 +286,8 @@
           <div class="label">Sua faixa</div>
           <div class="faixa" id="sim-faixa">—</div>
           <div class="amount" id="sim-amount"></div>
-          <button class="btn btn-ghost" id="ver-compat">Ver compatíveis no catálogo</button>
+          <a class="btn btn-primary" id="falar-best" target="_blank" rel="noopener" href="#"></a>
+          <button class="btn btn-ghost" id="ver-compat">Ver todos os compatíveis</button>
         </div>
       </div>
     </section>
@@ -277,11 +308,13 @@
           <button class="btn btn-primary" type="submit" id="lead-submit">Enviar e abrir WhatsApp</button>
         </form>
         <p class="lead-note" id="lead-status"></p>
-        <p class="legal">Matheus — consultor imobiliário parceiro Cury Construtora. Entrada e condições sujeitas a aprovação de crédito e enquadramento MCMV — consulte condições atualizadas. Ao enviar, você concorda em ser contatado por WhatsApp sobre este assunto.</p>
+        <p class="legal">Matheus Souza Imóveis SP — consultor imobiliário parceiro Cury Construtora. Entrada e condições sujeitas a aprovação de crédito e enquadramento MCMV — consulte condições atualizadas. Ao enviar, você concorda em ser contatado por WhatsApp sobre este assunto.</p>
       </div>
     </section>
 
   </div>
+
+  <a class="floating-wa" id="floating-wa" target="_blank" rel="noopener" href="#" aria-label="Falar no WhatsApp"></a>
 
   <nav class="tabbar">
     <button class="tab active" data-goto="home"><span id="icon-tab-home"></span><span class="tab-label">Home</span></button>
@@ -343,6 +376,24 @@
   function setIcon(id, name) { const el = document.getElementById(id); if (el) el.innerHTML = ICONS[name]; }
   function waLink(text) { return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`; }
 
+  // Maior gatilho de escassez real que temos: unidades HIS-1 (entrada mais barata) esgotam primeiro.
+  function faixaBadge(d) {
+    if (!d.faixa) return null;
+    if (d.faixa.his1 > 0) return `${d.faixa.his1} un. HIS-1`;
+    if (d.faixa.his2 > 0) return `${d.faixa.his2} un. HIS-2`;
+    if (d.faixa.r2v > 0) return `${d.faixa.r2v} un. R2V`;
+    return null;
+  }
+
+  function updateFloatingWa() {
+    const fw = document.getElementById("floating-wa");
+    fw.innerHTML = ICONS.chat;
+    const msg = lastViewedDev
+      ? `Vim do Uber, quero saber mais sobre o ${lastViewedDev.nome} (${lastViewedDev.bairro}).`
+      : "Vim do Uber e quero saber mais sobre os lançamentos Cury.";
+    fw.href = waLink(msg);
+  }
+
   let DEVELOPMENTS = [];
 
   function goto(screen) {
@@ -383,6 +434,7 @@
       const card = document.createElement("div");
       card.className = "dcard";
       card.dataset.id = d.id;
+      const badge = faixaBadge(d);
       card.innerHTML = `
         <div class="cover">
           <span class="badge zona">${ICONS.pin}${d.zona}</span>
@@ -394,6 +446,7 @@
           <div class="row">
             <span class="stat">${ICONS.bed}${d.dorms}</span>
             <span class="stat">${ICONS.coin}${ENTRADA}</span>
+            ${badge ? `<span class="stat stat-scarce">${ICONS.layers}${badge}</span>` : ""}
           </div>
         </div>
       `;
@@ -453,6 +506,7 @@
     currentDev = d;
     currentImg = 0;
     lastViewedDev = d;
+    updateFloatingWa();
     renderSheetCarousel();
     renderSheetBody();
     document.getElementById("sheet-scrim").hidden = false;
@@ -488,13 +542,14 @@
     const d = currentDev;
     const body = document.getElementById("sheet-body");
     const pdfHref = d.pdf_url ? d.pdf_url : waLink(`Oi Matheus! Pode me mandar o book completo (PDF) do ${d.nome}?`);
+    const badge = faixaBadge(d);
     body.innerHTML = `
       <h3>${d.nome}</h3>
       <div class="addr">${ICONS.pin}${d.endereco}</div>
       <div class="stat-row">
         <span class="stat">${ICONS.bed}${d.dorms}</span>
         <span class="stat">${ICONS.coin}Entrada ${ENTRADA}</span>
-        ${d.faixa ? `<span class="stat">${ICONS.layers}MCMV disponível</span>` : ""}
+        ${badge ? `<span class="stat stat-scarce">${ICONS.layers}${badge} disponíveis</span>` : ""}
       </div>
       <div class="amenity-grid">
         ${d.amenities.map((a) => `<span class="amenity">${a}</span>`).join("")}
@@ -529,6 +584,13 @@
   function setupSim() {
     const input = document.getElementById("renda");
     const result = document.getElementById("sim-result");
+    function bestMatch() {
+      const compatible = DEVELOPMENTS.filter((d) => !d.faixa || d.faixa[lastFaixa] > 0 || lastFaixa === "r2v");
+      if (!compatible.length) return null;
+      // Prioriza quem tem mais unidades na faixa dela (mais chance de disponibilidade real).
+      return compatible.slice().sort((a, b) => (b.faixa?.[lastFaixa] || 0) - (a.faixa?.[lastFaixa] || 0))[0];
+    }
+
     function calc() {
       const renda = parseFloat(input.value);
       if (!renda || renda <= 0) { input.focus(); return; }
@@ -537,6 +599,19 @@
       const labels = { his1: "HIS-1 · até 3 SM", his2: "HIS-2 · 3 a 6 SM", r2v: "R2V · sem limite" };
       document.getElementById("sim-faixa").textContent = labels[lastFaixa];
       document.getElementById("sim-amount").textContent = `Financiamento estimado: até ${money(financMax)}`;
+
+      const best = bestMatch();
+      const falarBtn = document.getElementById("falar-best");
+      if (best) {
+        lastViewedDev = best;
+        updateFloatingWa();
+        falarBtn.textContent = `Falar sobre o ${best.nome}`;
+        falarBtn.href = waLink(`Minha renda é R$ ${renda}, calculei que sou ${labels[lastFaixa]} — quero saber mais sobre o ${best.nome}.`);
+        falarBtn.style.display = "";
+      } else {
+        falarBtn.style.display = "none";
+      }
+
       result.classList.add("show");
       track("usa_simulador");
     }
@@ -606,6 +681,7 @@
   setupSheet();
   setupSim();
   setupFalar();
+  updateFloatingWa();
   loadDevelopments();
   track("view_home");
   window.addEventListener("resize", updateDeckScale);

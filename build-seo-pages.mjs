@@ -113,6 +113,10 @@ const CSS = `
   .planta-tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; overflow: hidden; cursor: pointer; }
   .planta-tile img { aspect-ratio: 4/3; object-fit: contain; background: #fff; padding: 6px; }
   .planta-tile .lbl { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-soft); padding: 8px 10px 10px; text-align: center; }
+  .foto-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .foto-tile { border-radius: 10px; overflow: hidden; cursor: pointer; aspect-ratio: 4/3; background: var(--surface); }
+  .foto-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+  .foto-tile:hover img { transform: scale(1.06); }
   .faixa-cards { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
   .faixa-card { background: var(--card); border: 1px solid var(--ring); border-radius: 12px; padding: 16px; }
   .faixa-card .n { font-family: var(--font-mono); font-size: 1.6rem; color: var(--accent); font-variant-numeric: tabular-nums; }
@@ -196,7 +200,7 @@ function pageHtml(d) {
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<title>${esc(d.nome)} — ${esc(d.bairro)}, São Paulo | Matheus, Corretor Cury</title>
+<title>${esc(d.nome)} — ${esc(d.bairro)}, São Paulo | Matheus Souza Imóveis SP</title>
 <meta name="description" content="${esc(metaDesc)}" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <link rel="canonical" href="${url}" />
@@ -208,7 +212,7 @@ function pageHtml(d) {
 <meta property="og:description" content="${esc(metaDesc)}" />
 <meta property="og:image" content="${ogImage}" />
 <meta property="og:url" content="${url}" />
-<meta property="og:site_name" content="Matheus — Corretor Cury São Paulo" />
+<meta property="og:site_name" content="Matheus Souza Imóveis SP" />
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${esc(d.nome)} — ${esc(d.bairro)}, São Paulo" />
@@ -265,6 +269,20 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
 
   <section>
     <div class="wrap">
+      <p class="eyebrow">Galeria</p>
+      <h2>Fotos reais do empreendimento</h2>
+      <p class="lede">Toca numa foto pra ver em tela cheia.</p>
+      <div class="foto-grid">
+        ${d.imagens.map((src, i) => `
+          <div class="foto-tile" data-gallery="fotos" data-i="${i}">
+            <img src="${src}" alt="${esc(d.nome)} — foto ${i + 1}" loading="lazy" />
+          </div>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
       <p class="eyebrow">Lazer</p>
       <h2>Áreas comuns</h2>
       <div class="amenity-grid">
@@ -281,7 +299,7 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
       <p class="lede">Toca numa planta pra ver em tela cheia.</p>
       <div class="planta-grid">
         ${plantas.map((p, i) => `
-          <div class="planta-tile" data-i="${i}">
+          <div class="planta-tile" data-gallery="plantas" data-i="${i}">
             <img src="${p.imagem}" alt="Planta — ${esc(p.label)} do ${esc(d.nome)}" loading="lazy" />
             <div class="lbl">${esc(p.label)}</div>
           </div>`).join('')}
@@ -325,7 +343,7 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
   </div>
 
   <footer class="wrap">
-    <p>Matheus — consultor imobiliário parceiro Cury Construtora. Fotos e plantas ilustrativas, obtidas do site oficial da Cury (cury.net) em setembro de 2026 — disponibilidade e valores sujeitos a alteração. Entrada e condições sujeitas a aprovação de crédito e enquadramento MCMV.</p>
+    <p>Matheus Souza Imóveis SP — consultor imobiliário parceiro Cury Construtora. Fotos e plantas ilustrativas, obtidas do site oficial da Cury (cury.net) em setembro de 2026 — disponibilidade e valores sujeitos a alteração. Entrada e condições sujeitas a aprovação de crédito e enquadramento MCMV.</p>
   </footer>
 </main>
 
@@ -337,11 +355,16 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
 </div>
 
 <script>
-  const plantas = ${JSON.stringify(plantas)};
+  const GALLERIES = {
+    fotos: ${JSON.stringify(d.imagens)},
+    plantas: ${JSON.stringify(plantas.map((p) => p.imagem))},
+  };
+  let lbGallery = 'fotos';
   let lbIndex = 0;
-  function openLightbox(i) { lbIndex = i; document.getElementById('lb-img').src = plantas[i].imagem; document.getElementById('lightbox').hidden = false; }
-  function shift(d) { lbIndex = (lbIndex + d + plantas.length) % plantas.length; document.getElementById('lb-img').src = plantas[lbIndex].imagem; }
-  document.querySelectorAll('.planta-tile').forEach((el) => el.addEventListener('click', () => openLightbox(Number(el.dataset.i))));
+  function srcOf(i) { return GALLERIES[lbGallery][i]; }
+  function openLightbox(gallery, i) { lbGallery = gallery; lbIndex = i; document.getElementById('lb-img').src = srcOf(i); document.getElementById('lightbox').hidden = false; }
+  function shift(delta) { const arr = GALLERIES[lbGallery]; lbIndex = (lbIndex + delta + arr.length) % arr.length; document.getElementById('lb-img').src = srcOf(lbIndex); }
+  document.querySelectorAll('[data-gallery]').forEach((el) => el.addEventListener('click', () => openLightbox(el.dataset.gallery, Number(el.dataset.i))));
   document.getElementById('lb-close')?.addEventListener('click', () => { document.getElementById('lightbox').hidden = true; });
   document.getElementById('lb-prev')?.addEventListener('click', () => shift(-1));
   document.getElementById('lb-next')?.addEventListener('click', () => shift(1));
