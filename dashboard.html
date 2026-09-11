@@ -180,10 +180,20 @@
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-pass").value;
     const errorEl = document.getElementById("login-error");
+    const btn = document.getElementById("login-btn");
     errorEl.textContent = "";
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) { errorEl.textContent = "E-mail ou senha errados."; return; }
-    showDashboard();
+    btn.disabled = true;
+    btn.textContent = "Entrando…";
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { errorEl.textContent = error.message || "E-mail ou senha errados."; return; }
+      showDashboard();
+    } catch (err) {
+      errorEl.textContent = "Falha de conexão: " + (err?.message || String(err));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Entrar";
+    }
   });
   document.getElementById("login-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("login-btn").click(); });
 
