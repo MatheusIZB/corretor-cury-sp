@@ -97,8 +97,25 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+  // Se algo quebrar ANTES do try/catch de baixo pegar (ex: a lib do CDN não carregou),
+  // isso aqui garante que aparece um aviso na tela em vez de a página ficar muda e o
+  // botão de entrar não fazer nada — foi exatamente esse tipo de falha silenciosa que
+  // causou o bug anterior do app principal.
+  window.addEventListener("error", function (e) {
+    var box = document.getElementById("login-error");
+    if (box && !box.textContent) box.textContent = "Erro ao carregar o painel: " + e.message;
+  });
+</script>
+<script>
+  if (typeof supabase === "undefined") {
+    document.getElementById("login-error").textContent = "Não consegui carregar a biblioteca do Supabase (CDN). Verifica sua internet e recarrega a página.";
+  }
+</script>
+<script>
   const SUPABASE_URL = "https://jbtnywgozszrhhzvwmob.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_bdWQhN8xxY7zlWR6gcGA1g_x8gOYDAP";
+  // Chave JWT (anon) em vez da publishable nova — formato mais antigo e mais testado
+  // pelo SDK do supabase-js, pra eliminar qualquer incompatibilidade de versão.
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpidG55d2dvenN6cmhoenZ3bW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNTEyMjQsImV4cCI6MjEwNDYyNzIyNH0.x5yKL65BPgf3xH8-q4wHhjwq7S-xicNHsnGaspqCBzQ";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const STATUS_OPTIONS = ["novo", "qualificado", "visita_agendada", "proposta", "fechado", "perdido"];
