@@ -103,9 +103,44 @@
   .home-hero .who .tagline { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.04em; margin-top: 4px; }
   .home-hero .who .role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
 
+  .home-topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; padding-top: calc(16px + env(safe-area-inset-top, 0)); }
+  .home-topbar .wordmark { font-family: var(--font-display); text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.02em; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .home-topbar .wordmark em { font-style: normal; color: var(--accent); }
+  .menu-btn { width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, var(--ground) 55%, transparent); border: 1px solid var(--ring-strong); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; gap: 3px; flex-direction: column; }
+  .menu-btn span { width: 16px; height: 2px; background: var(--ink); border-radius: 2px; }
+
+  .menu-panel { position: absolute; inset: 0; z-index: 40; background: color-mix(in srgb, var(--ground) 96%, transparent); backdrop-filter: blur(10px); display: flex; flex-direction: column; padding: 18px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+  .menu-panel.open { opacity: 1; pointer-events: auto; }
+  .menu-panel .menu-top { display: flex; justify-content: flex-end; }
+  .menu-panel nav { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+  .menu-panel nav button { text-align: left; font-family: var(--font-display); text-transform: uppercase; font-size: 1.6rem; padding: 12px 4px; color: var(--ink-soft); border-bottom: 1px solid var(--ring); }
+  .menu-panel nav button:active { color: var(--accent); }
+  .menu-panel .menu-foot { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-faint); padding: 10px 4px; }
+
   .home-body { padding: 18px 20px 8px; display: flex; flex-direction: column; gap: 16px; }
-  .home-body .pitch { font-size: 0.94rem; color: var(--ink-soft); }
+  .home-body .headline { font-size: clamp(1.5rem, 6vw, 1.9rem); line-height: 1.05; }
+  .home-body .headline em { font-style: normal; color: var(--accent); }
+  .home-body .pitch { font-size: 0.9rem; color: var(--ink-soft); }
   .home-body .pitch strong { color: var(--ink); }
+
+  .home-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .featured-card { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16/10; cursor: pointer; border: 1px solid var(--ring-strong); }
+  .featured-card img { width: 100%; height: 100%; object-fit: cover; }
+  .featured-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 55%); }
+  .featured-card .fc-flag { position: absolute; top: 12px; left: 12px; z-index: 2; }
+  .featured-card .fc-body { position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 2; }
+  .featured-card .fc-name { font-size: 1.15rem; }
+  .featured-card .fc-meta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-soft); margin-top: 4px; }
+
+  @keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .home-body > * { animation: fade-up 0.6s ease both; }
+  .home-body > *:nth-child(2) { animation-delay: 0.05s; }
+  .home-body > *:nth-child(3) { animation-delay: 0.1s; }
+  .home-body > *:nth-child(4) { animation-delay: 0.15s; }
+  .home-body > *:nth-child(5) { animation-delay: 0.2s; }
+  .home-body > *:nth-child(6) { animation-delay: 0.25s; }
+  @media (prefers-reduced-motion: reduce) { .home-body > * { animation: none; } }
 
   .proof-card { background: var(--surface); border: 1px solid var(--ring-strong); border-left: 3px solid var(--accent); border-radius: 4px; padding: 14px 16px; }
   .proof-card p { margin: 0; font-size: 0.92rem; font-style: italic; color: var(--ink); }
@@ -231,6 +266,10 @@
 
     <section class="screen active" id="screen-home" data-screen="home">
       <div class="home-hero">
+        <div class="home-topbar">
+          <span class="wordmark">Matheus <em>Imóveis SP</em></span>
+          <button class="menu-btn" id="menu-open" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        </div>
         <img src="assets/matheus-hero.webp" alt="Matheus Souza" />
         <div class="who">
           <div class="name display">Matheus Souza <em>Imóveis SP</em></div>
@@ -239,21 +278,32 @@
         </div>
       </div>
       <div class="home-body">
-        <span class="badge" id="icon-coin-slot"></span>
-        <p class="pitch">Rodei até você de Uber pra te mostrar isso: apartamento Minha Casa Minha Vida com <strong>entrada facilitada a partir de R$ 800,00</strong>. Dá uma olhada nos empreendimentos que eu vendo.</p>
-        <div class="proof-card">
-          <p>Eu mesmo comprei um apartamento Cury — não pra morar, pra construir patrimônio.</p>
-          <div class="sig">Matheus, sobre a própria compra</div>
-        </div>
-        <button class="btn btn-primary" data-goto="catalogo">Ver apartamentos</button>
+        <h1 class="headline display">Seu apartamento novo <em>com entrada de R$ 800</em></h1>
+        <p class="pitch">Consultor parceiro Cury em São Paulo. Comprei um apartamento Cury pra mim mesmo — hoje ajudo quem quer sair do aluguel a fazer o mesmo, com o financiamento certo pra sua renda.</p>
+        <div class="home-stats" id="home-stats"></div>
+        <button class="btn btn-primary" data-goto="catalogo">Ver apartamentos disponíveis</button>
+        <div class="featured-card" id="featured-card" hidden></div>
         <div class="home-rating">
           <span class="dots"><span></span><span></span><span></span><span></span><span class="off"></span></span>
-          4.9 nas corridas — mesmo cuidado no seu financiamento
+          4.9 de avaliação — mesmo cuidado que eu tenho com seu financiamento
         </div>
       </div>
       <div class="home-preview">
         <div class="lbl">Toca pra abrir</div>
         <div class="strip" id="home-strip"></div>
+      </div>
+
+      <div class="menu-panel" id="menu-panel">
+        <div class="menu-top">
+          <button class="menu-btn" id="menu-close" aria-label="Fechar menu" style="font-size:1.3rem;color:var(--ink);">×</button>
+        </div>
+        <nav>
+          <button data-goto="home" data-close-menu>Home</button>
+          <button data-goto="catalogo" data-close-menu>Apartamentos</button>
+          <button data-goto="simulador" data-close-menu>Simulador</button>
+          <button data-goto="falar" data-close-menu>Falar comigo</button>
+        </nav>
+        <div class="menu-foot">Matheus Souza Imóveis SP — parceiro Cury Construtora</div>
       </div>
     </section>
 
@@ -373,6 +423,7 @@
     calc: '<svg class="icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>',
     chat: '<svg class="icon" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 3 6.2L4 20l1.6-3.6A8 8 0 0 1 4 12Z"/></svg>',
     doc: '<svg class="icon" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg>',
+    building: '<svg class="icon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h.01M15 16h.01"/></svg>',
   };
   function setIcon(id, name) { const el = document.getElementById(id); if (el) el.innerHTML = ICONS[name]; }
   function waLink(text) { return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`; }
@@ -406,6 +457,12 @@
   function setupNav() {
     document.querySelectorAll("[data-goto]").forEach((el) => el.addEventListener("click", () => goto(el.dataset.goto)));
   }
+  function setupMenu() {
+    const panel = document.getElementById("menu-panel");
+    document.getElementById("menu-open").addEventListener("click", () => panel.classList.add("open"));
+    document.getElementById("menu-close").addEventListener("click", () => panel.classList.remove("open"));
+    document.querySelectorAll("[data-close-menu]").forEach((el) => el.addEventListener("click", () => panel.classList.remove("open")));
+  }
 
   async function loadDevelopments() {
     const deck = document.getElementById("deck");
@@ -421,6 +478,8 @@
       }
       renderDeck();
       renderHomeStrip();
+      renderHomeStats();
+      renderFeatured();
     } catch (err) {
       console.error("Falha ao carregar empreendimentos", err);
       deck.innerHTML = '<div class="empty-state">Não consegui carregar o catálogo agora.<br>Verifica sua internet e tenta de novo.</div>';
@@ -500,6 +559,33 @@
       mc.addEventListener("click", () => openSheet(d));
       strip.appendChild(mc);
     });
+  }
+
+  function renderHomeStats() {
+    const totalUnidades = DEVELOPMENTS.reduce((sum, d) => sum + (d.unidades_total || 0), 0);
+    const el = document.getElementById("home-stats");
+    el.innerHTML = `
+      <span class="badge">${ICONS.coin}Entrada a partir de R$ 800</span>
+      <span class="stat">${ICONS.layers}${DEVELOPMENTS.length} lançamentos ativos</span>
+      ${totalUnidades ? `<span class="stat">${ICONS.building}${totalUnidades.toLocaleString("pt-BR")}+ unidades</span>` : ""}
+    `;
+  }
+
+  function renderFeatured() {
+    const featured = DEVELOPMENTS.find((d) => d.novo_lancamento);
+    const card = document.getElementById("featured-card");
+    if (!featured) { card.hidden = true; return; }
+    const badge = faixaBadge(featured);
+    card.hidden = false;
+    card.innerHTML = `
+      <span class="flag-new fc-flag">Recém-lançado</span>
+      <img src="${featured.imagens[0]}" alt="${featured.nome}" loading="lazy" />
+      <div class="fc-body">
+        <div class="fc-name display">${featured.nome}</div>
+        <div class="fc-meta">${featured.bairro} · ${badge ? badge + " disponíveis" : featured.dorms}</div>
+      </div>
+    `;
+    card.addEventListener("click", () => openSheet(featured));
   }
 
   let currentDev = null, currentImg = 0, lastViewedDev = null;
@@ -681,6 +767,7 @@
   document.getElementById("icon-coin-slot").innerHTML = ICONS.coin + " Entrada facilitada a partir de " + ENTRADA;
 
   setupNav();
+  setupMenu();
   setupSheet();
   setupSim();
   setupFalar();
