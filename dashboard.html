@@ -70,6 +70,7 @@
     <input type="password" id="login-pass" placeholder="Senha" autocomplete="current-password" />
     <button id="login-btn">Entrar</button>
     <div class="login-error" id="login-error"></div>
+    <div id="diag" style="margin-top:18px;padding-top:14px;border-top:1px dashed var(--ring);font-family:var(--font-mono);font-size:0.68rem;color:var(--ink-faint);line-height:1.7;white-space:pre-wrap;"></div>
   </div>
 </div>
 
@@ -97,16 +98,28 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+  // Log de diagnóstico visível na própria tela — pra dar pra mandar print e eu saber
+  // exatamente onde travou, sem precisar abrir o console do navegador.
+  function diag(msg) {
+    var box = document.getElementById("diag");
+    if (!box) return;
+    var hora = new Date().toLocaleTimeString("pt-BR");
+    box.textContent += "[" + hora + "] " + msg + "\n";
+  }
+  diag("Página carregada. Navegador: " + navigator.userAgent.slice(0, 60));
+
   // Se algo quebrar ANTES do try/catch de baixo pegar (ex: a lib do CDN não carregou),
   // isso aqui garante que aparece um aviso na tela em vez de a página ficar muda e o
   // botão de entrar não fazer nada — foi exatamente esse tipo de falha silenciosa que
   // causou o bug anterior do app principal.
   window.addEventListener("error", function (e) {
+    diag("ERRO JS: " + e.message + " (" + (e.filename || "?").split("/").pop() + ":" + e.lineno + ")");
     var box = document.getElementById("login-error");
     if (box && !box.textContent) box.textContent = "Erro ao carregar o painel: " + e.message;
   });
 </script>
 <script>
+  diag("Biblioteca Supabase (CDN): " + (typeof supabase === "undefined" ? "NÃO CARREGOU" : "carregada OK"));
   if (typeof supabase === "undefined") {
     document.getElementById("login-error").textContent = "Não consegui carregar a biblioteca do Supabase (CDN). Verifica sua internet e recarrega a página.";
   }
@@ -116,7 +129,13 @@
   // Chave JWT (anon) em vez da publishable nova — formato mais antigo e mais testado
   // pelo SDK do supabase-js, pra eliminar qualquer incompatibilidade de versão.
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpidG55d2dvenN6cmhoenZ3bW9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNTEyMjQsImV4cCI6MjEwNDYyNzIyNH0.x5yKL65BPgf3xH8-q4wHhjwq7S-xicNHsnGaspqCBzQ";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let sb;
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    diag("Cliente Supabase criado OK.");
+  } catch (e) {
+    diag("ERRO ao criar cliente Supabase: " + e.message);
+  }
 
   const STATUS_OPTIONS = ["novo", "qualificado", "visita_agendada", "proposta", "fechado", "perdido"];
   const FUNNEL_STEPS = [
@@ -201,11 +220,19 @@
     errorEl.textContent = "";
     btn.disabled = true;
     btn.textContent = "Entrando…";
+    diag("Clicou em Entrar. E-mail: " + email + " | senha tem " + password.length + " caracteres.");
+    if (!sb) { diag("PAROU: cliente Supabase (sb) não existe."); errorEl.textContent = "Painel não inicializou direito. Recarrega a página."; btn.disabled = false; btn.textContent = "Entrar"; return; }
     try {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) { errorEl.textContent = error.message || "E-mail ou senha errados."; return; }
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        diag("Supabase retornou ERRO: \"" + error.message + "\" (status " + (error.status || "?") + ", code " + (error.code || "?") + ")");
+        errorEl.textContent = error.message || "E-mail ou senha errados.";
+        return;
+      }
+      diag("Login OK! Sessão criada para: " + (data?.user?.email || "?"));
       showDashboard();
     } catch (err) {
+      diag("EXCEÇÃO ao logar: " + (err?.message || String(err)));
       errorEl.textContent = "Falha de conexão: " + (err?.message || String(err));
     } finally {
       btn.disabled = false;
