@@ -416,16 +416,18 @@ ${d.novo_lancamento ? '<div class="progress-bar" id="progress-bar"></div>' : ''}
   document.getElementById('lb-next')?.addEventListener('click', () => shift(1));
   document.getElementById('lightbox')?.addEventListener('click', (e) => { if (e.target.id === 'lightbox') e.target.hidden = true; });
 </script>
-${d.novo_lancamento ? flagshipScripts() : ''}
+${motionScripts()}
 </body>
 </html>`;
 }
 
-// Script de assinatura da página em destaque: scroll suave (Lenis) + revelação/paralaxe
-// (GSAP ScrollTrigger) + tilt 3D leve nos cards + barra de progresso. Tudo via CDN porque
-// isso já não é mais um artifact isolado (site real, sem CSP bloqueando script externo).
-// Respeita prefers-reduced-motion via matchMedia — em vez de desligar tudo, simplifica.
-function flagshipScripts() {
+// Camada de movimento de TODAS as páginas: scroll suave (Lenis) + revelação em cascata
+// + tilt 3D leve nos cards. Os efeitos extras (barra de progresso, paralaxe do hero, glow
+// pulsante do CTA) só existem fisicamente no HTML/CSS da página em destaque — aqui o script
+// só procura os elementos (getElementById) e ignora de forma segura quando não existem, então
+// a mesma função serve pra todo mundo sem duplicar código. Via CDN: isso não é mais um artifact
+// isolado (site real, sem CSP bloqueando script externo). Respeita prefers-reduced-motion.
+function motionScripts() {
   return `
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
