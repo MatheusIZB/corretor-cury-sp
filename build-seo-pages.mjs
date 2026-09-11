@@ -41,6 +41,7 @@ const ICONS = {
   cart: '<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 7H6"/></svg>',
   playground: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 7v6M6 20l6-7 6 7M9 13h6"/></svg>',
   building: '<svg class="icon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h.01M15 16h.01"/></svg>',
+  zoom: '<svg class="icon" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m21 21-4.4-4.4M10 7v6M7 10h6"/></svg>',
 };
 function iconFor(name) {
   const n = name.toLowerCase();
@@ -81,7 +82,7 @@ const CSS = `
   .topbar .back { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft); text-decoration: none; }
   .topbar .back svg.icon { width: 16px; height: 16px; }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; font-size: 0.86rem; padding: 13px 20px; border-radius: 100px; cursor: pointer; text-decoration: none; white-space: nowrap; }
-  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 4px 18px color-mix(in srgb, var(--accent) 45%, transparent); }
   .btn-ghost { background: var(--surface-2); color: var(--ink); border: 1.5px solid var(--ring-strong); }
   .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); display: flex; align-items: center; gap: 10px; }
   .eyebrow::before { content: ""; width: 20px; height: 2px; background: var(--accent); display: inline-block; flex-shrink: 0; }
@@ -110,9 +111,11 @@ const CSS = `
   .amenity-tile svg.icon { width: 22px; height: 22px; color: var(--accent); }
   .amenity-tile span { font-size: 0.72rem; color: var(--ink-soft); line-height: 1.3; }
   .planta-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-  .planta-tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; overflow: hidden; cursor: pointer; }
+  .planta-tile { position: relative; background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; overflow: hidden; cursor: pointer; }
   .planta-tile img { aspect-ratio: 4/3; object-fit: contain; background: #fff; padding: 6px; }
   .planta-tile .lbl { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-soft); padding: 8px 10px 10px; text-align: center; }
+  .planta-tile .expand { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; }
+  .planta-tile .expand svg.icon { width: 15px; height: 15px; }
   .foto-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
   .foto-tile { border-radius: 10px; overflow: hidden; cursor: pointer; aspect-ratio: 4/3; background: var(--surface); }
   .foto-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
@@ -152,6 +155,20 @@ const CSS = `
   .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--ring-strong); font-size: 1.4rem; display: flex; align-items: center; justify-content: center; }
   .lightbox-nav.prev { left: 18px; } .lightbox-nav.next { right: 18px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+`;
+
+// CSS extra só para a página em destaque (novo_lancamento) — o "momento de assinatura"
+// (barra de progresso, glow pulsante no CTA, container preparado pro parallax do hero).
+const FLAGSHIP_CSS = `
+  .progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--accent); z-index: 50; box-shadow: 0 0 12px var(--accent); }
+  .hero-parallax { position: absolute; inset: -10% 0 0 0; height: 120%; }
+  .hero-parallax img { width: 100%; height: 100%; object-fit: cover; }
+  .final-cta .btn-primary { animation: cta-pulse 2.4s ease-in-out infinite; }
+  @keyframes cta-pulse { 0%, 100% { box-shadow: 0 4px 18px color-mix(in srgb, var(--accent) 45%, transparent); } 50% { box-shadow: 0 4px 32px color-mix(in srgb, var(--accent) 80%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .final-cta .btn-primary { animation: none; } }
+  @media (hover: hover) {
+    .foto-tile, .planta-tile, .related-card { transform-style: preserve-3d; will-change: transform; }
+  }
 `;
 
 function pageHtml(d, allDevs) {
@@ -230,9 +247,10 @@ function pageHtml(d, allDevs) {
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</script>` : ''}
 
-<style>${CSS}</style>
+<style>${CSS}${d.novo_lancamento ? FLAGSHIP_CSS : ''}</style>
 </head>
 <body>
+${d.novo_lancamento ? '<div class="progress-bar" id="progress-bar"></div>' : ''}
 <header class="topbar">
   <a class="back" href="index.html">
     <svg class="icon" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
@@ -243,8 +261,10 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
 
 <main>
   <div class="hero">
-    <img src="${d.imagens[0]}" alt="Fachada do ${esc(d.nome)}, em ${esc(d.bairro)}, São Paulo" />
-    <div class="hero-content">
+    ${d.novo_lancamento
+      ? `<div class="hero-parallax" id="hero-parallax"><img src="${d.imagens[0]}" alt="Fachada do ${esc(d.nome)}, em ${esc(d.bairro)}, São Paulo" /></div>`
+      : `<img src="${d.imagens[0]}" alt="Fachada do ${esc(d.nome)}, em ${esc(d.bairro)}, São Paulo" />`}
+    <div class="hero-content" id="hero-content">
       <span class="eyebrow">${esc(d.zona)}${d.novo_lancamento ? ' · Recém-lançado' : ''}</span>
       <h1>${esc(d.nome)}</h1>
       <div class="bairro">${ICONS.pin} ${esc(d.endereco)}</div>
@@ -308,6 +328,7 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
       <div class="planta-grid">
         ${plantas.map((p, i) => `
           <div class="planta-tile" data-gallery="plantas" data-i="${i}">
+            <span class="expand">${ICONS.zoom}</span>
             <img src="${p.imagem}" alt="Planta — ${esc(p.label)} do ${esc(d.nome)}" loading="lazy" />
             <div class="lbl">${esc(p.label)}</div>
           </div>`).join('')}
@@ -395,8 +416,88 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
   document.getElementById('lb-next')?.addEventListener('click', () => shift(1));
   document.getElementById('lightbox')?.addEventListener('click', (e) => { if (e.target.id === 'lightbox') e.target.hidden = true; });
 </script>
+${d.novo_lancamento ? flagshipScripts() : ''}
 </body>
 </html>`;
+}
+
+// Script de assinatura da página em destaque: scroll suave (Lenis) + revelação/paralaxe
+// (GSAP ScrollTrigger) + tilt 3D leve nos cards + barra de progresso. Tudo via CDN porque
+// isso já não é mais um artifact isolado (site real, sem CSP bloqueando script externo).
+// Respeita prefers-reduced-motion via matchMedia — em vez de desligar tudo, simplifica.
+function flagshipScripts() {
+  return `
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>
+  (function () {
+    if (!window.gsap || !window.ScrollTrigger) return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reduced && window.Lenis) {
+      var lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    }
+
+    // Barra de progresso no topo.
+    var bar = document.getElementById('progress-bar');
+    if (bar) {
+      gsap.to(bar, {
+        width: '100%', ease: 'none',
+        scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: true },
+      });
+    }
+
+    // Paralaxe sutil no hero (só transform, compositor-friendly).
+    var heroImg = document.getElementById('hero-parallax');
+    if (heroImg && !reduced) {
+      gsap.to(heroImg, {
+        yPercent: 15, ease: 'none',
+        scrollTrigger: { trigger: heroImg.closest('.hero'), start: 'top top', end: 'bottom top', scrub: true },
+      });
+    }
+
+    // Entrada do título/CTA.
+    gsap.from('#hero-content > *', { y: 24, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' });
+
+    // Revelação em cascata por seção ao rolar.
+    document.querySelectorAll('main > section, .final-cta').forEach(function (sec) {
+      var kids = sec.querySelectorAll('.wrap > *');
+      gsap.from(kids.length ? kids : sec, {
+        y: 28, opacity: 0, duration: 0.7, stagger: 0.06, ease: 'power2.out',
+        scrollTrigger: { trigger: sec, start: 'top 82%' },
+      });
+    });
+
+    // Tilt 3D leve nos cards, só em telas com mouse (não desperdiça bateria no celular).
+    if (window.matchMedia('(hover: hover)').matches && !reduced) {
+      document.querySelectorAll('.foto-tile, .planta-tile, .related-card').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          var r = card.getBoundingClientRect();
+          var px = (e.clientX - r.left) / r.width - 0.5;
+          var py = (e.clientY - r.top) / r.height - 0.5;
+          gsap.to(card, { rotateY: px * 10, rotateX: py * -10, duration: 0.4, ease: 'power2.out', transformPerspective: 600 });
+        });
+        card.addEventListener('mouseleave', function () {
+          gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.5, ease: 'power3.out' });
+        });
+      });
+    }
+
+    // Zoom suave ao abrir a lightbox (fotos e plantas), em vez do corte seco do hidden=false.
+    var lb = document.getElementById('lightbox');
+    if (lb) {
+      new MutationObserver(function () {
+        if (!lb.hidden) gsap.fromTo(lb, { opacity: 0 }, { opacity: 1, duration: 0.25 });
+      }).observe(lb, { attributes: true, attributeFilter: ['hidden'] });
+    }
+  })();
+</script>`;
 }
 
 async function main() {
