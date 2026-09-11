@@ -102,6 +102,12 @@
   .faq-item summary::after { content: "+"; color: var(--accent); font-family: var(--font-display); flex-shrink: 0; }
   .faq-item[open] summary::after { content: "\2013"; }
   .faq-item p { padding: 0 18px 16px; margin: 0; color: var(--ink-soft); font-size: 0.88rem; }
+  .related-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .related-card { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--ring); background: var(--card); text-decoration: none; }
+  .related-card img { aspect-ratio: 4/3; object-fit: cover; }
+  .related-card .rc-body { padding: 12px 14px 14px; }
+  .related-card .rc-name { font-size: 0.88rem; font-weight: 700; }
+  .related-card .rc-bairro { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-soft); margin-top: 4px; }
   .final-cta { text-align: center; padding: 44px 0; }
   .final-cta h2 { font-size: clamp(1.5rem, 3vw + 0.8rem, 2rem); max-width: 16ch; margin: 10px auto 0; }
   .final-cta .btn { margin: 22px auto 0; max-width: 320px; }
@@ -246,6 +252,37 @@
         <div class="step"><div class="num">2</div><div class="txt"><b>Confirme sua faixa</b><span>Me manda sua renda mensal que eu já te digo se é HIS-1, HIS-2 ou R2V.</span></div></div>
         <div class="step"><div class="num">3</div><div class="txt"><b>Simule o financiamento</b><span>Faço a simulação com você, sem compromisso.</span></div></div>
         <div class="step"><div class="num">4</div><div class="txt"><b>Agende a visita</b><span>Marco o horário certo pra você conhecer o empreendimento.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Continue sua pesquisa</p>
+      <h2>Outros empreendimentos que podem te interessar</h2>
+      <div class="related-grid">
+        
+          <a class="related-card" href="emp-santo-amaro.html">
+            <img src="assets/santo-amaro-01.webp" alt="Mérito Santo Amaro" loading="lazy" />
+            <div class="rc-body">
+              <div class="rc-name">Mérito Santo Amaro</div>
+              <div class="rc-bairro">Santo Amaro</div>
+            </div>
+          </a>
+          <a class="related-card" href="emp-granja.html">
+            <img src="assets/granja-05.webp" alt="Alto Granja Julieta" loading="lazy" />
+            <div class="rc-body">
+              <div class="rc-name">Alto Granja Julieta</div>
+              <div class="rc-bairro">Granja Julieta</div>
+            </div>
+          </a>
+          <a class="related-card" href="emp-barra.html">
+            <img src="assets/barra-05.webp" alt="Bosque da Barra" loading="lazy" />
+            <div class="rc-body">
+              <div class="rc-name">Bosque da Barra</div>
+              <div class="rc-bairro">Barra Funda</div>
+            </div>
+          </a>
       </div>
     </div>
   </section>

@@ -134,6 +134,12 @@ const CSS = `
   .faq-item summary::after { content: "+"; color: var(--accent); font-family: var(--font-display); flex-shrink: 0; }
   .faq-item[open] summary::after { content: "\\2013"; }
   .faq-item p { padding: 0 18px 16px; margin: 0; color: var(--ink-soft); font-size: 0.88rem; }
+  .related-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .related-card { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--ring); background: var(--card); text-decoration: none; }
+  .related-card img { aspect-ratio: 4/3; object-fit: cover; }
+  .related-card .rc-body { padding: 12px 14px 14px; }
+  .related-card .rc-name { font-size: 0.88rem; font-weight: 700; }
+  .related-card .rc-bairro { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-soft); margin-top: 4px; }
   .final-cta { text-align: center; padding: 44px 0; }
   .final-cta h2 { font-size: clamp(1.5rem, 3vw + 0.8rem, 2rem); max-width: 16ch; margin: 10px auto 0; }
   .final-cta .btn { margin: 22px auto 0; max-width: 320px; }
@@ -148,7 +154,9 @@ const CSS = `
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;
 
-function pageHtml(d) {
+function pageHtml(d, allDevs) {
+  const relacionados = allDevs.filter((x) => x.slug !== d.slug && x.zona === d.zona).slice(0, 3);
+  const relacionadosFallback = relacionados.length ? relacionados : allDevs.filter((x) => x.slug !== d.slug).slice(0, 3);
   const url = `${SITE_URL}/emp-${d.slug}.html`;
   const ogImage = `${SITE_URL}/${d.imagens[0]}`;
   const metaDesc = `${d.destaque} Entrada facilitada a partir de R$ ${d.entrada_valor}. ${d.dorms}, ${d.bairro}, São Paulo — Cury Construtora.`.slice(0, 165);
@@ -237,7 +245,7 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
   <div class="hero">
     <img src="${d.imagens[0]}" alt="Fachada do ${esc(d.nome)}, em ${esc(d.bairro)}, São Paulo" />
     <div class="hero-content">
-      <span class="eyebrow">${esc(d.zona)}</span>
+      <span class="eyebrow">${esc(d.zona)}${d.novo_lancamento ? ' · Recém-lançado' : ''}</span>
       <h1>${esc(d.nome)}</h1>
       <div class="bairro">${ICONS.pin} ${esc(d.endereco)}</div>
     </div>
@@ -330,6 +338,23 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
 
   <section>
     <div class="wrap">
+      <p class="eyebrow">Continue sua pesquisa</p>
+      <h2>Outros empreendimentos que podem te interessar</h2>
+      <div class="related-grid">
+        ${relacionadosFallback.map((r) => `
+          <a class="related-card" href="emp-${r.slug}.html">
+            <img src="${r.imagens[0]}" alt="${esc(r.nome)}" loading="lazy" />
+            <div class="rc-body">
+              <div class="rc-name">${esc(r.nome)}</div>
+              <div class="rc-bairro">${esc(r.bairro)}</div>
+            </div>
+          </a>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
       <p class="eyebrow">Dúvidas</p>
       <h2>Perguntas frequentes</h2>
       <div class="faq-list">${faqHtml}</div>
@@ -375,7 +400,7 @@ ${faqJsonLd ? `<script type="application/ld+json">${JSON.stringify(faqJsonLd)}</
 }
 
 async function main() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/empreendimentos?select=*&ativo=eq.true&order=nome`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/empreendimentos?select=*&ativo=eq.true&order=novo_lancamento.desc,nome.asc`, {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
   });
   if (!res.ok) throw new Error(`Supabase ${res.status}`);
@@ -383,7 +408,7 @@ async function main() {
 
   for (const d of devs) {
     const file = join(__dirname, `emp-${d.slug}.html`);
-    writeFileSync(file, pageHtml(d), 'utf8');
+    writeFileSync(file, pageHtml(d, devs), 'utf8');
     console.log('Gerado:', file);
   }
 

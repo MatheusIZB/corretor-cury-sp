@@ -143,6 +143,7 @@
   .dcard .bairro svg.icon { width: 13px; height: 13px; color: var(--accent); }
   .dcard .row { display: flex; gap: 7px; flex-wrap: wrap; }
   .stat-scarce { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+  .flag-new { position: absolute; top: 10px; right: 10px; z-index: 2; background: var(--clay); color: var(--ink); font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 5px 10px; border-radius: 100px; }
 
   .floating-wa {
     position: absolute; right: 16px; bottom: 84px; z-index: 45;
@@ -410,7 +411,7 @@
     const deck = document.getElementById("deck");
     deck.innerHTML = '<div class="loading-state">Carregando empreendimentos…</div>';
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/empreendimentos?select=*&ativo=eq.true&order=nome`, { headers: sbHeaders });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/empreendimentos?select=*&ativo=eq.true&order=novo_lancamento.desc,nome.asc`, { headers: sbHeaders });
       if (!res.ok) throw new Error(`Supabase respondeu ${res.status}`);
       DEVELOPMENTS = await res.json();
       deck.innerHTML = "";
@@ -437,6 +438,7 @@
       const badge = faixaBadge(d);
       card.innerHTML = `
         <div class="cover">
+          ${d.novo_lancamento ? `<span class="flag-new">Recém-lançado</span>` : ""}
           <span class="badge zona">${ICONS.pin}${d.zona}</span>
           <img src="${d.imagens[0]}" alt="${d.nome}" loading="lazy" />
         </div>
@@ -544,6 +546,7 @@
     const pdfHref = d.pdf_url ? d.pdf_url : waLink(`Oi Matheus! Pode me mandar o book completo (PDF) do ${d.nome}?`);
     const badge = faixaBadge(d);
     body.innerHTML = `
+      ${d.novo_lancamento ? `<span class="badge" style="background:color-mix(in srgb, var(--clay) 20%, var(--ground));color:var(--clay);border-color:color-mix(in srgb, var(--clay) 45%, transparent);margin-bottom:8px;">Recém-lançado</span>` : ""}
       <h3>${d.nome}</h3>
       <div class="addr">${ICONS.pin}${d.endereco}</div>
       <div class="stat-row">
