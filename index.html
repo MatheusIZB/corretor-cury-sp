@@ -95,17 +95,10 @@
 
   #screen-home { padding-bottom: 20px; }
   .home-hero { position: relative; aspect-ratio: 4/5; flex-shrink: 0; background: var(--surface); }
-  .home-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
-  .home-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, var(--ground) 96%); }
-  .home-hero .who { position: absolute; left: 20px; bottom: 18px; right: 20px; z-index: 2; }
-  .home-hero .who .name { font-size: 1.7rem; }
-  .home-hero .who .name em { font-style: normal; color: var(--accent); }
-  .home-hero .who .tagline { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 0.04em; margin-top: 4px; }
-  .home-hero .who .role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+  .home-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .home-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 88%, var(--ground) 100%); pointer-events: none; }
 
-  .home-topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; padding-top: calc(16px + env(safe-area-inset-top, 0)); }
-  .home-topbar .wordmark { font-family: var(--font-display); text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.02em; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
-  .home-topbar .wordmark em { font-style: normal; color: var(--accent); }
+  .home-topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; justify-content: flex-end; padding: 16px 18px; padding-top: calc(16px + env(safe-area-inset-top, 0)); }
   .menu-btn { width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, var(--ground) 55%, transparent); border: 1px solid var(--ring-strong); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; gap: 3px; flex-direction: column; }
   .menu-btn span { width: 16px; height: 2px; background: var(--ink); border-radius: 2px; }
 
@@ -267,15 +260,9 @@
     <section class="screen active" id="screen-home" data-screen="home">
       <div class="home-hero">
         <div class="home-topbar">
-          <span class="wordmark">Matheus <em>Imóveis SP</em></span>
           <button class="menu-btn" id="menu-open" aria-label="Abrir menu"><span></span><span></span><span></span></button>
         </div>
-        <img src="assets/matheus-hero.webp" alt="Matheus Souza" />
-        <div class="who">
-          <div class="name display">Matheus Souza <em>Imóveis SP</em></div>
-          <div class="tagline">Sonhos reais. Oportunidades de verdade.</div>
-          <div class="role">Consultor imobiliário parceiro Cury</div>
-        </div>
+        <img src="assets/matheus-hero-v2.webp" alt="Matheus Souza — Matheus Imóveis SP, Sonhos reais. Oportunidades de verdade." />
       </div>
       <div class="home-body">
         <h1 class="headline display">Seu apartamento novo <em>com entrada de R$ 800</em></h1>
