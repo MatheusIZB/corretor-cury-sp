@@ -7,19 +7,21 @@
 <meta name="description" content="Matheus Souza Imóveis SP — consultor parceiro Cury Construtora. Catálogo de lançamentos, simulador Minha Casa Minha Vida e contato direto no WhatsApp." />
 <style>
   :root {
-    --ground: #100d08;
-    --surface: #1b160d;
-    --surface-2: #241d12;
-    --card: #1f1a10;
-    --ink: #f4eedd;
-    --ink-soft: #b7ac90;
-    --ink-faint: #8a8064;
-    --accent: #ffc61a;
-    --accent-ink: #17120a;
+    --ground: #0a1830;
+    --surface: #12233f;
+    --surface-2: #1a2d4e;
+    --card: #132542;
+    --ink: #f2f6fc;
+    --ink-soft: #9fb4d6;
+    --ink-faint: #6c82a8;
+    --accent: #1e6feb;
+    --accent-ink: #ffffff;
+    --cta: #ffc61a;
+    --cta-ink: #17120a;
     --clay: #e67a3e;
-    --ring: rgba(244, 238, 221, 0.12);
-    --ring-strong: rgba(244, 238, 221, 0.24);
-    --shadow: rgba(0, 0, 0, 0.6);
+    --ring: rgba(242, 246, 252, 0.12);
+    --ring-strong: rgba(242, 246, 252, 0.24);
+    --shadow: rgba(3, 9, 20, 0.6);
 
     --font-display: "Arial Black", "Helvetica Neue", Arial, sans-serif;
     --font-ui: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -82,7 +84,7 @@
   .tab.active { color: var(--accent); }
 
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; font-size: 0.9rem; padding: 15px 22px; border-radius: 100px; cursor: pointer; text-decoration: none; transition: transform 0.15s ease; width: 100%; }
-  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary { background: var(--cta); color: var(--cta-ink); }
   .btn-primary:active { transform: scale(0.97); }
   .btn-ghost { background: var(--surface-2); color: var(--ink); border: 1.5px solid var(--ring-strong); }
   .btn[disabled] { opacity: 0.5; pointer-events: none; }
@@ -176,7 +178,7 @@
   .floating-wa {
     position: absolute; right: 16px; bottom: 84px; z-index: 45;
     width: 52px; height: 52px; border-radius: 50%;
-    background: var(--accent); color: var(--accent-ink);
+    background: var(--cta); color: var(--cta-ink);
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 8px 20px var(--shadow);
     cursor: pointer;
@@ -184,7 +186,7 @@
   .floating-wa svg.icon { width: 24px; height: 24px; }
   .floating-wa::after {
     content: ""; position: absolute; inset: -4px; border-radius: 50%;
-    border: 2px solid var(--accent); opacity: 0.5;
+    border: 2px solid var(--cta); opacity: 0.5;
     animation: wa-pulse 2.2s ease-out infinite;
   }
   @keyframes wa-pulse { 0% { transform: scale(0.9); opacity: 0.5; } 100% { transform: scale(1.35); opacity: 0; } }
